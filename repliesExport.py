@@ -9,7 +9,7 @@ import os
 def load_config(config_path='config.json'):
     if not os.path.exists(config_path):
         raise FileNotFoundError(
-            f"{config_path} bulunamadı. Lütfen token, cookie ve channel bilgilerini içeren bir config.json oluşturun.")
+            f"{config_path} bulunamadı. Lütfen token, cookie ve channel bilgilerini içeren bir config.json oluşturun...")
 
     with open(config_path, 'r', encoding='utf-8') as f:
         config = json.load(f)
