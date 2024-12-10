@@ -1,27 +1,35 @@
 import csv
 import requests
 import time
+import json
+import os
 
-# 1️⃣ Slack Token, Channel ID ve URL'ler
-SLACK_TOKEN = ""  # User tokenınızı buraya ekleyin
-CHANNEL_ID = "C07TQGGMB44"  # Slack kanal ID'sini buraya ekleyin
-BASE_URL = "https://slack.com/api"
 
-# 2️⃣ Header ve Cookie
-headers = {
-    'Authorization': f'Bearer {SLACK_TOKEN}',
-    'Content-Type': 'application/json',
-    'Cookie': ''  # Buraya Slack'e ait çerez değeri eklenmeli
-}
+def load_config(config_path='config.json'):
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(
+            f"{config_path} bulunamadı. Lütfen token, cookie ve channel bilgilerini içeren bir config.json oluşturun.")
 
-def fetch_channel_threads(channel_id):
-    """Kanal içerisindeki tüm thread mesajlarını alır (yalnızca thread ana mesajları)."""
+    with open(config_path, 'r', encoding='utf-8') as f:
+        config = json.load(f)
+    return config
+
+
+def fetch_channel_messages(token, cookie, channel_id):
+    """Kanal içerisindeki tüm mesajları alır. Thread başlatanlara thread_ts = ts, diğerlerine ''."""
+    BASE_URL = "https://slack.com/api"
     url = f"{BASE_URL}/conversations.history"
     params = {
         'channel': channel_id,
-        'limit': 999
+        'limit': 200
     }
-    all_threads = []
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+        'Cookie': cookie
+    }
+
+    all_messages = []
     next_cursor = None
     total_messages = 0
 
@@ -46,18 +54,21 @@ def fetch_channel_threads(channel_id):
             messages = data.get('messages', [])
             total_messages += len(messages)
 
-            # Sadece thread başlatan mesajları ekle
             for message in messages:
+                # thread_ts belirle
                 if 'reply_count' in message and message['reply_count'] > 0:
-                    all_threads.append({
-                        'ts': message.get('ts', ''),
-                        'user': message.get('user', 'Bilinmiyor'),
-                        'text': message.get('text', '').replace('\n', ' '),
-                        'thread_ts': message.get('thread_ts', message.get('ts', '')),
-                        'reply_count': message.get('reply_count', 0),
-                        'subtype': message.get('subtype', 'normal_message'),
-                    })
-                    print(f"📝 Thread bulundu: {message.get('text', '').strip()[:50]}... | reply_count: {message.get('reply_count', 0)}")
+                    thread_ts = message.get('ts', '')
+                else:
+                    thread_ts = ''
+
+                all_messages.append({
+                    'ts': message.get('ts', ''),
+                    'user': message.get('user', 'Bilinmiyor'),
+                    'text': message.get('text', '').replace('\n', ' '),
+                    'thread_ts': thread_ts,
+                    'reply_count': message.get('reply_count', 0),
+                    'subtype': message.get('subtype', 'normal_message'),
+                })
 
             # Next cursor kontrolü
             next_cursor = data.get('response_metadata', {}).get('next_cursor')
@@ -71,33 +82,44 @@ def fetch_channel_threads(channel_id):
             print(f"❌ İstek hatası: {e}")
             break
 
-    return all_threads
+    return all_messages
 
-def save_threads_to_csv(threads, filename='threads.csv'):
-    """Thread mesajlarını bir CSV dosyasına kaydeder."""
+
+def save_messages_to_csv(messages, filename='threads.csv'):
+    """Mesajları bir CSV dosyasına kaydeder."""
     with open(filename, mode='w', encoding='utf-8', newline='') as file:
         writer = csv.writer(file)
         # CSV başlıklarını ayarlayın
         writer.writerow(['ts', 'user', 'text', 'thread_ts', 'reply_count', 'subtype'])
 
-        for thread in threads:
+        for msg in messages:
             writer.writerow([
-                thread['ts'],
-                thread['user'],
-                thread['text'],
-                thread['thread_ts'],
-                thread['reply_count'],
-                thread['subtype'],
+                msg['ts'],
+                msg['user'],
+                msg['text'],
+                msg['thread_ts'],
+                msg['reply_count'],
+                msg['subtype'],
             ])
 
-    print(f"📁 Thread mesajları {filename} dosyasına kaydedildi. Toplam thread sayısı: {len(threads)}")
+    print(f"📁 Mesajlar {filename} dosyasına kaydedildi. Toplam mesaj sayısı: {len(messages)}")
+
 
 def main():
-    print(f"🔍 {CHANNEL_ID} kanalındaki thread mesajları çekiliyor...")
-    threads = fetch_channel_threads(CHANNEL_ID)
-    print(f"✅ Toplam {len(threads)} adet thread mesajı bulundu.")
-    save_threads_to_csv(threads)
+    config = load_config()  # config.json'dan ayarları oku
+    token = config.get('SLACK_TOKEN')
+    cookie = config.get('SLACK_COOKIE', '')
+    channel_id = config.get('CHANNEL_ID')
+
+    if not token or not channel_id:
+        raise ValueError("SLACK_TOKEN ve CHANNEL_ID config.json dosyasında bulunamadı.")
+
+    print(f"🔍 {channel_id} kanalındaki mesajlar çekiliyor...")
+    messages = fetch_channel_messages(token, cookie, channel_id)
+    print(f"✅ Toplam {len(messages)} adet mesaj bulundu (thread başlatanlar dahil).")
+    save_messages_to_csv(messages)
     print(f"📁 CSV dosyası oluşturuldu: threads.csv")
+
 
 if __name__ == "__main__":
     main()
