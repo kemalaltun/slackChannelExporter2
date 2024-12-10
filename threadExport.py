@@ -19,7 +19,7 @@ def fetch_channel_threads(channel_id):
     url = f"{BASE_URL}/conversations.history"
     params = {
         'channel': channel_id,
-        'limit': 200
+        'limit': 999
     }
     all_threads = []
     next_cursor = None
