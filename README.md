@@ -4,10 +4,10 @@ Token, Cookie ve Channel id bilgilerini **config.json** dosyasına eklememiz ger
 **Bu bilgilere nereden ulaşırım?**
 1.Channel url'indeki son path bizim channel id'mizdir. veya Channel linki kopyalayarak linkteki id'yi alabilirsiniz
 2.Token ve Cookie için network kısmına conversion.history yazalım ve ilgili channel'da sayfayı yenileyelim. Buradaki network isteğini curl olarak kopyalayıp postmane yapıştıralım.
-![image](https://github.com/user-attachments/assets/274ae36a-6335-429d-98a9-2b1cc908de3d)
+![image](https://github.com/user-attachments/assets/1e605e56-8708-4feb-ac60-ca9830582d6f)
 3.Bu curl'ü postman'e importlayalım.
-4. Token bilgisine body kısmından ulaşabiliriz örn -> "xoxc-.." ![image](https://github.com/user-attachments/assets/04867e9a-e479-4e85-bd69-7bf0f8d92e67)
-5. Cookie bilgisine Headers kısmından ulaşabiliriz örn -> "d=xoxd..." ![image](https://github.com/user-attachments/assets/039cfa2e-183d-4ede-b2fe-5736368f709e)
+4. Token bilgisine body kısmından ulaşabiliriz örn -> "xoxc-.." ![image](https://github.com/user-attachments/assets/44e9fa4a-bdd2-4ca6-ade3-c0e5f78578b1)
+5. Cookie bilgisine Headers kısmından ulaşabiliriz örn -> "d=xoxd..." ![image](https://github.com/user-attachments/assets/e6f31f8e-48ac-4e26-847f-e562c3d14e48)
 
 **messagesExportWithoutReplies.py**
 Slack channel'ındaki tüm mesajları **thread.csv** dosyası olarak exportlar. reply kısımları dahil değildir
