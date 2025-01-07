@@ -10,10 +10,10 @@ Token, Cookie ve Channel id bilgilerini **config.json** dosyasına eklememiz ger
 5. Cookie bilgisine Headers kısmından ulaşabiliriz örn -> "d=xoxd..." ![image](https://github.com/user-attachments/assets/e6f31f8e-48ac-4e26-847f-e562c3d14e48)
 
 **messagesExportWithoutReplies.py**
-Slack channel'ındaki tüm mesajları **thread.csv** dosyası olarak exportlar. reply kısımları dahil değildir
+Slack channel'ındaki tüm mesajları **threads.csv** dosyası olarak exportlar. reply kısımları dahil değildir
 
 **threadsExportWithoutReplies.py**
-Slack channel'ındaki tüm threadleri(altında reply içeren mesajlar) **thread.csv** dosyasına exportlar reply kısımları dahil değildir.
+Slack channel'ındaki tüm threadleri(altında reply içeren mesajlar) **threads.csv** dosyasına exportlar reply kısımları dahil değildir.
 
 **repliesExport.py**
-Slack channel'ındaki replies kısımlarını **thread.csv** dosyasındaki **thread_ts** fieldına göre **replies.csv** dosyasına exportlar. Çalışması için **thread.csv**'nin oluşmuş olması yani yukarıdaki 2 komuttan birinin çalıştırılmış olması gerekmektedir.
+Slack channel'ındaki replies kısımlarını **thread.csv** dosyasındaki **thread_ts** fieldına göre **replies.csv** dosyasına exportlar. Çalışması için **threads.csv**'nin oluşmuş olması yani yukarıdaki 2 komuttan birinin çalıştırılmış olması gerekmektedir.
